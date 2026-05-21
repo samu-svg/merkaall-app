@@ -12,6 +12,33 @@ export type Promocao = {
   avaliacao: number | null;
   aprovada: boolean;
   criada_em: string;
+  expires_at?: string | null;
+  frete_gratis?: boolean;
+};
+
+export type AlertaPreco = {
+  id: string;
+  titulo: string;
+  categoria: string | null;
+  precoMaximo: number;
+  ativo: boolean;
+  criadoEm: string;
+};
+
+export type FiltrosAtivos = {
+  categoria: string;
+  freteGratis: boolean;
+  descontoMinimo: number;
+  precoMax: number | null;
+  ordenacao: 'desconto' | 'preco' | 'avaliacao' | 'recente';
+};
+
+export const FILTROS_PADRAO: FiltrosAtivos = {
+  categoria: 'Todas',
+  freteGratis: false,
+  descontoMinimo: 0,
+  precoMax: null,
+  ordenacao: 'desconto',
 };
 
 export const CATEGORIA_TODAS = "Todas";

@@ -24,7 +24,8 @@
     },
     "scheme": "promocaopro",
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      "expo-notifications"
     ]
   }
 }
