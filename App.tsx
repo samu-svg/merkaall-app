@@ -1,7 +1,7 @@
 import 'react-native-reanimated';
 import 'react-native-url-polyfill/auto';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -13,7 +13,6 @@ import { HomeScreen } from '@/screens/HomeScreen';
 import { SavedScreen } from '@/screens/SavedScreen';
 import { AlertsScreen } from '@/screens/AlertsScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
-import { useState } from 'react';
 
 function AppContent() {
   const [tab, setTab] = useState<TabName>('home');

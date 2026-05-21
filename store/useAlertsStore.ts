@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import 'react-native-get-random-values';
 
 import type { AlertaPreco } from '@/lib/types';
 
