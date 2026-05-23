@@ -1,5 +1,6 @@
 import "react-native-url-polyfill/auto";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let _client: SupabaseClient | null = null;
@@ -41,7 +42,12 @@ export function getSupabaseClient(): SupabaseClient | null {
 
   try {
     _client = createClient(url, key, {
-      auth: { persistSession: false },
+      auth: {
+        storage: AsyncStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
       realtime: { params: { eventsPerSecond: 5 } },
     });
     return _client;
@@ -50,6 +56,10 @@ export function getSupabaseClient(): SupabaseClient | null {
     return null;
   }
 }
+
+const FETCH_TIMEOUT_MS = 60_000;
+const FEED_PAGE_SIZE = 200;
+const FEED_MAX_ITEMS = 5000;
 
 export async function buscarPromocoes(): Promise<{
   data: import("./types").Promocao[];
@@ -63,15 +73,45 @@ export async function buscarPromocoes(): Promise<{
     };
   }
 
-  const { data, error } = await supabase
-    .from("promocoes")
-    .select("*")
-    .eq("aprovada", true)
-    .order("percentual_desconto", { ascending: false })
-    .limit(120);
+  const fetchAll = async (): Promise<{ data: import("./types").Promocao[]; error: string | null }> => {
+    const acumulado: import("./types").Promocao[] = [];
+    let offset = 0;
 
-  if (error) {
-    return { data: [], error: error.message };
+    while (acumulado.length < FEED_MAX_ITEMS) {
+      const fim = Math.min(offset + FEED_PAGE_SIZE - 1, FEED_MAX_ITEMS - 1);
+      const { data, error } = await supabase
+        .from("promocoes")
+        .select("*")
+        .eq("aprovada", true)
+        .order("percentual_desconto", { ascending: false })
+        .range(offset, fim);
+
+      if (error) {
+        return { data: acumulado, error: error.message };
+      }
+
+      const pagina = (data ?? []) as import("./types").Promocao[];
+      if (pagina.length === 0) break;
+
+      acumulado.push(...pagina);
+      if (pagina.length < FEED_PAGE_SIZE) break;
+      offset += FEED_PAGE_SIZE;
+    }
+
+    return { data: acumulado, error: null };
+  };
+
+  try {
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error("Tempo esgotado ao buscar promoções. Verifique sua conexão.")),
+        FETCH_TIMEOUT_MS,
+      ),
+    );
+
+    return await Promise.race([fetchAll(), timeoutPromise]);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro ao buscar promoções.";
+    return { data: [], error: message };
   }
-  return { data: (data ?? []) as import("./types").Promocao[], error: null };
 }
