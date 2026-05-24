@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import { fmtBRL } from "@/lib/format";
+import { LojaBadge } from "@/components/LojaBadge";
 import type { Promocao } from "@/lib/types";
 
 type Props = { promocoes: Promocao[] };
@@ -70,6 +71,7 @@ export function BannerRotativo({ promocoes }: Props) {
 
         {/* Info */}
         <View style={styles.info}>
+          <LojaBadge promo={promo} />
           <Text style={styles.label}>🔥 Oferta em destaque</Text>
           <Text style={styles.titulo} numberOfLines={2}>
             {promo.titulo}

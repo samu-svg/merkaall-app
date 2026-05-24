@@ -5,6 +5,7 @@ import { Spacing, Radius } from '@/constants/spacing';
 
 type Props = {
   freteGratis: boolean;
+  filtrosAtivos: boolean;
   onToggleFrete: () => void;
   onOpenFiltros: () => void;
   onOpenOrdenar: () => void;
@@ -17,22 +18,26 @@ type ChipProps = {
   onPress: () => void;
 };
 
-function FilterChip({ label, icon, ativo, onPress }: ChipProps) {
+function FilterChip({ label, icon, ativo, badge, onPress }: ChipProps & { badge?: boolean }) {
   return (
     <Pressable onPress={onPress} style={[styles.chip, ativo && styles.chipAtivo]}>
-      {icon}
-      <Text style={[styles.chipText, ativo && styles.chipTextAtivo]}>{label}</Text>
+      <View style={styles.chipInner}>
+        {icon}
+        <Text style={[styles.chipText, ativo && styles.chipTextAtivo]}>{label}</Text>
+        {badge && <View style={styles.dot} />}
+      </View>
     </Pressable>
   );
 }
 
-export function FilterRow({ freteGratis, onToggleFrete, onOpenFiltros, onOpenOrdenar }: Props) {
+export function FilterRow({ freteGratis, filtrosAtivos, onToggleFrete, onOpenFiltros, onOpenOrdenar }: Props) {
   return (
     <View style={styles.row}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <FilterChip
           label="Filtrar"
-          icon={<SlidersHorizontal size={13} color={Colors.textSecondary} />}
+          badge={filtrosAtivos}
+          icon={<SlidersHorizontal size={13} color={filtrosAtivos ? Colors.primary : Colors.textSecondary} />}
           onPress={onOpenFiltros}
         />
         <FilterChip
@@ -65,6 +70,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
   },
   chipAtivo: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  chipInner: { flexDirection: 'row', alignItems: 'center', gap: 5, position: 'relative' },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+    marginLeft: 2,
+  },
   chipText: { fontSize: 12, fontWeight: '500', color: Colors.textSecondary },
   chipTextAtivo: { color: Colors.surface },
   ordenar: {

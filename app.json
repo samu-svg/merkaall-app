@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#f97316"
       },
-      "package": "com.promocaopro.app"
+      "package": "com.promocaopro.app",
+      "permissions": ["POST_NOTIFICATIONS"]
     },
     "scheme": "promocaopro",
     "plugins": [

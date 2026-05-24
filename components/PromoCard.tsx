@@ -1,6 +1,8 @@
 import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Heart } from 'lucide-react-native';
+import { ShareButton } from '@/components/ShareButton';
+import { LojaBadge } from '@/components/LojaBadge';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { fmtBRL } from '@/lib/format';
@@ -33,12 +35,13 @@ export function PromoCard({ promo, salvo, onToggleSalvo }: Props) {
         </View>
         {promo.avaliacao != null && (
           <View style={styles.badgeRating}>
-            <Text style={styles.ratingText}>★ {promo.avaliacao.toFixed(1)}</Text>
+            <Text style={styles.ratingText}>★ {Number(promo.avaliacao).toFixed(1)}</Text>
           </View>
         )}
       </View>
 
       <View style={styles.body}>
+        <LojaBadge promo={promo} compact />
         <Text style={styles.titulo} numberOfLines={2}>{promo.titulo}</Text>
         <Text style={styles.precoOriginal}>{fmtBRL.format(promo.preco_original)}</Text>
         <Text style={styles.precoAtual}>{fmtBRL.format(promo.preco_desconto)}</Text>
@@ -46,14 +49,17 @@ export function PromoCard({ promo, salvo, onToggleSalvo }: Props) {
         <View style={styles.footer}>
           {promo.frete_gratis ? (
             <Text style={styles.frete}>Frete grátis</Text>
-          ) : <View />}
-          <Pressable onPress={handleSalvar} style={styles.heartBtn}>
-            <Heart
-              size={14}
-              color={Colors.primary}
-              fill={salvo ? Colors.primary : 'none'}
-            />
-          </Pressable>
+          ) : <View style={styles.footerSpacer} />}
+          <View style={styles.actions}>
+            <ShareButton promo={promo} />
+            <Pressable onPress={handleSalvar} style={styles.heartBtn}>
+              <Heart
+                size={14}
+                color={Colors.primary}
+                fill={salvo ? Colors.primary : 'none'}
+              />
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -121,6 +127,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   frete: { fontSize: 10, color: Colors.success, fontWeight: '500' },
+  footerSpacer: { flex: 1 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   heartBtn: {
     backgroundColor: Colors.primaryLight,
     padding: 5,

@@ -8,6 +8,7 @@ import {
 } from "react-native";
 
 import { fmtBRL } from "@/lib/format";
+import { LojaBadge } from "@/components/LojaBadge";
 import type { Promocao } from "@/lib/types";
 
 function StarRating({ rating }: { rating: number | null }) {
@@ -51,6 +52,7 @@ export function PromocaoCard({ promo }: Props) {
 
       {/* Corpo */}
       <View style={styles.body}>
+        <LojaBadge promo={promo} />
         <Text style={styles.titulo} numberOfLines={2}>
           {promo.titulo}
         </Text>

@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import {
+  ActivityIndicator,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -6,10 +9,14 @@ import {
   Text,
   View,
 } from 'react-native';
+
+import { AuthModal } from '@/components/AuthModal';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useSavedStore } from '@/store/useSavedStore';
 import { useAlertsStore } from '@/store/useAlertsStore';
+import { useNotificationsStore } from '@/store/useNotificationsStore';
 
 type SectionProps = { title: string; children: React.ReactNode };
 
@@ -34,14 +41,62 @@ function Row({ label, value, right, last }: RowProps) {
 }
 
 export function ProfileScreen() {
+  const [authVisible, setAuthVisible] = useState(false);
+  const { session, perfil, isInitialized, isLoading, signOut } = useAuthStore();
   const { saved } = useSavedStore();
   const { alertas } = useAlertsStore();
+  const { prefs, setPref, permissionGranted } = useNotificationsStore();
   const alertasAtivos = alertas.filter((a) => a.ativo).length;
+  const isLoggedIn = Boolean(session);
+
+  async function handleSignOut() {
+    await signOut();
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.title}>Perfil</Text>
+
+        <Section title="Conta">
+          {!isInitialized ? (
+            <View style={styles.accountLoading}>
+              <ActivityIndicator color={Colors.primary} />
+            </View>
+          ) : isLoggedIn ? (
+            <>
+              <Row
+                label="Nome"
+                value={perfil?.nome ?? session?.user.email?.split('@')[0] ?? 'Usuário'}
+              />
+              <Row label="E-mail" value={session?.user.email ?? '—'} />
+              <Row label="Sincronização" value="Salvos e alertas na nuvem" />
+              <View style={[styles.row, styles.rowLast]}>
+                <Pressable
+                  style={[styles.logoutBtn, isLoading && styles.logoutBtnDisabled]}
+                  onPress={() => void handleSignOut()}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color={Colors.danger} size="small" />
+                  ) : (
+                    <Text style={styles.logoutText}>Sair da conta</Text>
+                  )}
+                </Pressable>
+              </View>
+            </>
+          ) : (
+            <View style={styles.guestBlock}>
+              <Text style={styles.guestText}>
+                Você está usando o app como visitante. Crie uma conta para salvar seus dados na
+                nuvem.
+              </Text>
+              <Pressable style={styles.loginBtn} onPress={() => setAuthVisible(true)}>
+                <Text style={styles.loginBtnText}>Entrar ou criar conta</Text>
+              </Pressable>
+            </View>
+          )}
+        </Section>
 
         <Section title="Atividade">
           <Row label="Promoções salvas" value={String(saved.length)} />
@@ -51,22 +106,26 @@ export function ProfileScreen() {
 
         <Section title="Notificações">
           <Row
-            label="Alertas de preço"
+            label="Queda de preço (salvos)"
             right={
               <Switch
-                value={alertasAtivos > 0}
+                value={prefs.quedaPreco}
+                onValueChange={(v) => setPref('quedaPreco', v)}
+                disabled={!permissionGranted}
                 trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-                thumbColor={alertasAtivos > 0 ? Colors.primary : Colors.textTertiary}
+                thumbColor={prefs.quedaPreco && permissionGranted ? Colors.primary : Colors.textTertiary}
               />
             }
           />
           <Row
-            label="Novas promoções"
+            label="Novas promoções (+50% OFF)"
             right={
               <Switch
-                value={false}
+                value={prefs.novasPromocoes}
+                onValueChange={(v) => setPref('novasPromocoes', v)}
+                disabled={!permissionGranted}
                 trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-                thumbColor={Colors.textTertiary}
+                thumbColor={prefs.novasPromocoes && permissionGranted ? Colors.primary : Colors.textTertiary}
               />
             }
             last
@@ -75,7 +134,7 @@ export function ProfileScreen() {
 
         <Section title="Sobre">
           <Row label="Versão" value="1.0.0" />
-          <Row label="Banco de dados" value="Supabase Realtime" />
+          <Row label="Banco de dados" value="Supabase" />
           <Row label="Fonte das ofertas" value="Mercado Livre" last />
         </Section>
 
@@ -84,6 +143,8 @@ export function ProfileScreen() {
           Links podem gerar comissão para o app.
         </Text>
       </ScrollView>
+
+      <AuthModal visible={authVisible} onClose={() => setAuthVisible(false)} />
     </SafeAreaView>
   );
 }
@@ -118,6 +179,43 @@ const styles = StyleSheet.create({
   },
   rowLast: { borderBottomWidth: 0 },
   rowLabel: { fontSize: 14, color: Colors.textPrimary },
-  rowValue: { fontSize: 14, color: Colors.textSecondary },
+  rowValue: { fontSize: 14, color: Colors.textSecondary, maxWidth: '55%', textAlign: 'right' },
+  guestBlock: {
+    padding: Spacing.md,
+    gap: Spacing.md,
+  },
+  guestText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  loginBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.button,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+  },
+  loginBtnText: {
+    color: Colors.surface,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  accountLoading: {
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
+  logoutBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: Spacing.xs,
+  },
+  logoutBtnDisabled: {
+    opacity: 0.6,
+  },
+  logoutText: {
+    color: Colors.danger,
+    fontSize: 15,
+    fontWeight: '500',
+  },
   footer: { fontSize: 11, color: Colors.textTertiary, textAlign: 'center', lineHeight: 18 },
 });

@@ -8,6 +8,7 @@ export type TabName = 'home' | 'saved' | 'alerts' | 'profile';
 type Props = {
   active: TabName;
   onChange: (tab: TabName) => void;
+  badgeCount?: number;
 };
 
 const TABS = [
@@ -17,15 +18,23 @@ const TABS = [
   { name: 'profile' as TabName, label: 'Perfil', Icon: User },
 ];
 
-export function BottomNav({ active, onChange }: Props) {
+export function BottomNav({ active, onChange, badgeCount = 0 }: Props) {
   return (
     <View style={styles.container}>
       {TABS.map(({ name, label, Icon }) => {
         const isActive = active === name;
         const color = isActive ? Colors.primary : Colors.textTertiary;
+        const showBadge = name === 'alerts' && badgeCount > 0;
         return (
           <Pressable key={name} style={styles.tab} onPress={() => onChange(name)}>
-            <Icon size={22} color={color} />
+            <View style={styles.iconWrap}>
+              <Icon size={22} color={color} />
+              {showBadge && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{badgeCount > 99 ? '99+' : badgeCount}</Text>
+                </View>
+              )}
+            </View>
             <Text style={[styles.label, isActive && styles.labelActive]}>{label}</Text>
           </Pressable>
         );
@@ -45,6 +54,20 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.border,
   },
   tab: { flex: 1, alignItems: 'center', gap: 3, paddingVertical: Spacing.xs },
+  iconWrap: { position: 'relative' },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -10,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: { color: '#fff', fontSize: 9, fontWeight: '700' },
   label: { fontSize: 10, fontWeight: '400', color: Colors.textTertiary },
   labelActive: { color: Colors.primary, fontWeight: '500' },
 });

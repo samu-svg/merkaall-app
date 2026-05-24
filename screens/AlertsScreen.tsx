@@ -12,26 +12,45 @@ import {
 import { Plus, Trash2, Bell } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
-import { fmtBRL } from '@/lib/format';
+import { formatAlertCondicao, formatAlertStatus } from '@/lib/alerts';
 import { useAlertsStore } from '@/store/useAlertsStore';
 
 function AddAlertForm({ onAdd }: { onAdd: () => void }) {
   const [titulo, setTitulo] = useState('');
   const [precoStr, setPrecoStr] = useState('');
+  const [descontoStr, setDescontoStr] = useState('');
+  const [ativo, setAtivo] = useState(true);
   const { adicionar } = useAlertsStore();
 
   function submit() {
-    const preco = parseFloat(precoStr.replace(',', '.'));
-    if (!titulo.trim() || isNaN(preco) || preco <= 0) return;
-    adicionar(titulo.trim(), null, preco);
+    if (!titulo.trim()) return;
+
+    const preco = precoStr.trim()
+      ? parseFloat(precoStr.replace(',', '.'))
+      : null;
+    const desconto = descontoStr.trim()
+      ? parseInt(descontoStr, 10)
+      : 0;
+
+    if (precoStr.trim() && (isNaN(preco!) || preco! <= 0)) return;
+    if (descontoStr.trim() && (isNaN(desconto) || desconto < 0 || desconto > 90)) return;
+
+    adicionar({
+      titulo: titulo.trim(),
+      precoMaximo: preco,
+      descontoMinimo: desconto,
+      ativo,
+    });
     setTitulo('');
     setPrecoStr('');
+    setDescontoStr('');
+    setAtivo(true);
     onAdd();
   }
 
   return (
     <View style={styles.form}>
-      <Text style={styles.formTitle}>Novo Alerta</Text>
+      <Text style={styles.formTitle}>Novo alerta</Text>
       <TextInput
         style={styles.input}
         value={titulo}
@@ -43,10 +62,27 @@ function AddAlertForm({ onAdd }: { onAdd: () => void }) {
         style={styles.input}
         value={precoStr}
         onChangeText={setPrecoStr}
-        placeholder="Preço máximo (ex: 299.90)"
+        placeholder="Preço máximo em R$ (opcional)"
         placeholderTextColor={Colors.textTertiary}
-        keyboardType="numeric"
+        keyboardType="decimal-pad"
       />
+      <TextInput
+        style={styles.input}
+        value={descontoStr}
+        onChangeText={setDescontoStr}
+        placeholder="Desconto mínimo em % (opcional)"
+        placeholderTextColor={Colors.textTertiary}
+        keyboardType="number-pad"
+      />
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Ativar alerta</Text>
+        <Switch
+          value={ativo}
+          onValueChange={setAtivo}
+          trackColor={{ false: Colors.border, true: Colors.primaryLight }}
+          thumbColor={ativo ? Colors.primary : Colors.textTertiary}
+        />
+      </View>
       <Pressable
         style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
         onPress={submit}
@@ -88,7 +124,14 @@ export function AlertsScreen() {
           <View style={[styles.card, !item.ativo && styles.cardInativo]}>
             <View style={styles.cardInfo}>
               <Text style={styles.alertTitulo} numberOfLines={1}>{item.titulo}</Text>
-              <Text style={styles.alertPreco}>Máx: {fmtBRL.format(item.precoMaximo)}</Text>
+              <Text style={styles.alertCondicao}>{formatAlertCondicao(item)}</Text>
+              <View style={styles.statusRow}>
+                <View style={[styles.statusBadge, item.ativo ? styles.statusAtivo : styles.statusInativo]}>
+                  <Text style={[styles.statusText, item.ativo ? styles.statusTextAtivo : styles.statusTextInativo]}>
+                    {formatAlertStatus(item.ativo)}
+                  </Text>
+                </View>
+              </View>
             </View>
             <Switch
               value={item.ativo}
@@ -145,6 +188,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textPrimary,
   },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.xs,
+  },
+  switchLabel: { fontSize: 14, color: Colors.textPrimary },
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -167,10 +217,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  cardInativo: { opacity: 0.5 },
-  cardInfo: { flex: 1, gap: 2 },
+  cardInativo: { opacity: 0.55 },
+  cardInfo: { flex: 1, gap: 4 },
   alertTitulo: { fontSize: 14, fontWeight: '500', color: Colors.textPrimary },
-  alertPreco: { fontSize: 12, color: Colors.textSecondary },
+  alertCondicao: { fontSize: 12, color: Colors.textSecondary },
+  statusRow: { flexDirection: 'row', marginTop: 2 },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: Radius.chip,
+  },
+  statusAtivo: { backgroundColor: Colors.successLight },
+  statusInativo: { backgroundColor: Colors.background },
+  statusText: { fontSize: 10, fontWeight: '600' },
+  statusTextAtivo: { color: Colors.success },
+  statusTextInativo: { color: Colors.textTertiary },
   removeBtn: { padding: Spacing.xs },
   empty: { padding: 48, alignItems: 'center', gap: Spacing.sm },
   emptyTitle: { fontSize: 16, fontWeight: '500', color: Colors.textPrimary },

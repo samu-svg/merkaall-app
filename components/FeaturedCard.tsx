@@ -1,5 +1,7 @@
 import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Zap } from 'lucide-react-native';
+import { ShareButton } from '@/components/ShareButton';
+import { LojaBadge } from '@/components/LojaBadge';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { fmtBRL } from '@/lib/format';
@@ -23,6 +25,8 @@ export function FeaturedCard({ promo }: Props) {
             <CountdownTimer expiresAt={promo.expires_at} />
           </>
         )}
+        <View style={styles.tagSpacer} />
+        <ShareButton promo={promo} size={13} />
       </View>
 
       <View style={styles.body}>
@@ -35,6 +39,7 @@ export function FeaturedCard({ promo }: Props) {
         </View>
 
         <View style={styles.info}>
+          <LojaBadge promo={promo} />
           <Text style={styles.titulo} numberOfLines={2}>{promo.titulo}</Text>
           <Text style={styles.precoOriginal}>{fmtBRL.format(promo.preco_original)}</Text>
           <View style={styles.precoRow}>
@@ -73,6 +78,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.primaryLight,
   },
+  tagSpacer: { flex: 1 },
   tagText: { fontSize: 11, color: Colors.primaryText, fontWeight: '500' },
   tagSep: { fontSize: 11, color: Colors.textTertiary },
   body: {
