@@ -1,7 +1,10 @@
 import { useCallback, useRef } from 'react';
+import { track } from '@/lib/analytics';
 import { getSupabaseClient } from '../lib/supabase';
-import { getDeviceId } from '../lib/deviceId';
+import { getEffectiveUserId } from '../lib/userId';
 import type { Promocao } from '../lib/types';
+
+const FUNNEL_EVENTS = new Set(['view', 'open_link', 'favorite']);
 
 const PESOS: Record<string, number> = {
   view:       1,
@@ -19,10 +22,18 @@ export function useRastreamento() {
     tipo: keyof typeof PESOS,
     promocao: Promocao
   ) => {
+    if (FUNNEL_EVENTS.has(tipo)) {
+      track(tipo, {
+        promocao_id: promocao.id,
+        categoria: promocao.categoria ?? null,
+        loja: promocao.loja ?? null,
+      });
+    }
+
     try {
       const supabase = getSupabaseClient();
       if (!supabase) return;
-      const userId = await getDeviceId();
+      const userId = await getEffectiveUserId();
       await supabase.from('user_events').insert({
         user_id:     userId,
         promocao_id: promocao.id,

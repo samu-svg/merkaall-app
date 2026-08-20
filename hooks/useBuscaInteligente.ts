@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 
+import { DESCONTO_MAX_PADRAO } from '@/lib/types';
+import { filterPromocoesConfiaveis, normalizePromocao } from '@/lib/promoFormat';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Promocao } from '@/lib/types';
 
@@ -99,12 +101,15 @@ export function useBuscaInteligente() {
         });
 
         if (!erroFTS && dataFTS && dataFTS.length > 0) {
+          const promocoes = filterPromocoesConfiaveis(
+            (dataFTS as Record<string, unknown>[]).map(normalizePromocao),
+          ).filter((p) => p.percentual_desconto <= DESCONTO_MAX_PADRAO);
           setEstado({
-            promocoes: dataFTS as Promocao[],
+            promocoes,
             carregando: false,
             erro: null,
             termosExpandidos,
-            totalEncontrado: dataFTS.length,
+            totalEncontrado: promocoes.length,
           });
           return;
         }
@@ -120,17 +125,21 @@ export function useBuscaInteligente() {
           .from('promocoes')
           .select('*')
           .eq('aprovada', true)
+          .lte('percentual_desconto', DESCONTO_MAX_PADRAO)
           .or(filtrosOR)
           .order('criada_em', { ascending: false })
           .limit(50);
 
         if (error) throw error;
+        const promocoes = filterPromocoesConfiaveis(
+          (data ?? []).map((row) => normalizePromocao(row as Record<string, unknown>)),
+        );
         setEstado({
-          promocoes: (data ?? []) as Promocao[],
+          promocoes,
           carregando: false,
           erro: null,
           termosExpandidos,
-          totalEncontrado: data?.length ?? 0,
+          totalEncontrado: promocoes.length,
         });
       } catch (err: unknown) {
         console.error('[Busca] Erro:', err);

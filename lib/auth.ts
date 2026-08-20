@@ -1,6 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 
 import { getSupabaseClient } from "@/lib/supabase";
+import { validatePasswordStrength } from "@/lib/password";
 import type { PerfilUsuario } from "@/lib/types";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
@@ -14,7 +15,7 @@ function mapAuthError(message: string): string {
     return "Este e-mail já está cadastrado.";
   }
   if (lower.includes("password should be at least")) {
-    return "A senha deve ter pelo menos 6 caracteres.";
+    return "A senha deve ter pelo menos 12 caracteres.";
   }
   if (lower.includes("unable to validate email address")) {
     return "Informe um e-mail válido.";
@@ -92,6 +93,9 @@ export async function cadastrar(
   if (!supabase) {
     return { ok: false, error: "Supabase não configurado." };
   }
+
+  const senhaErro = validatePasswordStrength(senha);
+  if (senhaErro) return { ok: false, error: senhaErro };
 
   const { data, error } = await supabase.auth.signUp({
     email,

@@ -1,9 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 
-const PREFS_KEY = '@promocaopro:notification_prefs';
-const UNREAD_KEY = '@promocaopro:unread_notifications';
-const SEEN_IDS_KEY = '@promocaopro:seen_promo_ids';
+import { STORAGE_PREFIX } from '@/constants/brand';
+import { migrateStorageKey } from '@/lib/storageMigration';
+
+const LEGACY_PREFIX = '@promocaopro';
+const PREFS_KEY = `${STORAGE_PREFIX}:notification_prefs`;
+const UNREAD_KEY = `${STORAGE_PREFIX}:unread_notifications`;
+const SEEN_IDS_KEY = `${STORAGE_PREFIX}:seen_promo_ids`;
+
+async function migrateLegacyNotificationStorage(): Promise<void> {
+  await migrateStorageKey(`${LEGACY_PREFIX}:notification_prefs`, PREFS_KEY);
+  await migrateStorageKey(`${LEGACY_PREFIX}:unread_notifications`, UNREAD_KEY);
+  await migrateStorageKey(`${LEGACY_PREFIX}:seen_promo_ids`, SEEN_IDS_KEY);
+}
 
 export type NotificationPrefs = {
   novasPromocoes: boolean;
@@ -39,6 +49,7 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
 
   load: async () => {
     try {
+      await migrateLegacyNotificationStorage();
       const [prefsRaw, unreadRaw, seenRaw] = await Promise.all([
         AsyncStorage.getItem(PREFS_KEY),
         AsyncStorage.getItem(UNREAD_KEY),

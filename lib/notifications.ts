@@ -37,7 +37,7 @@ export async function sendPromoNotification(promo: Promocao): Promise<void> {
     content: {
       title: '🔥 Nova promoção!',
       body: `${promo.titulo} com ${desconto}% OFF por R$${promo.preco_desconto.toFixed(2)}`,
-      data: { screen: 'alerts' },
+      data: { screen: 'feed', promoId: promo.id },
     },
     trigger: null,
   });
@@ -48,7 +48,7 @@ export async function sendPriceDropNotification(promo: Promocao): Promise<void> 
     content: {
       title: '📉 Preço caiu!',
       body: `${promo.titulo} agora por R$${promo.preco_desconto.toFixed(2)}`,
-      data: { screen: 'alerts' },
+      data: { screen: 'feed', promoId: promo.id },
     },
     trigger: null,
   });
@@ -63,7 +63,7 @@ export async function sendAlertMatchNotification(
     content: {
       title: '🔔 Alerta encontrado!',
       body: `"${alertaTitulo}": ${promo.titulo} por R$${promo.preco_desconto.toFixed(2)} (${desconto}% OFF)`,
-      data: { screen: 'alerts' },
+      data: { screen: 'feed', promoId: promo.id },
     },
     trigger: null,
   });

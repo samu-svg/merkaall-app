@@ -3,6 +3,8 @@ node_modules/
 dist/
 npm-debug.*
 *.jks
+*_OLD_*.jks
+upload_certificate.pem
 *.p8
 *.p12
 *.key
@@ -11,3 +13,4 @@ npm-debug.*
 web-build/
 .env
 .env.local
+.expo-*.log

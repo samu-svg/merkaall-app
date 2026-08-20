@@ -1,17 +1,30 @@
-import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { Zap } from 'lucide-react-native';
 import { ShareButton } from '@/components/ShareButton';
 import { LojaBadge } from '@/components/LojaBadge';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { fmtBRL } from '@/lib/format';
+import { getPromoCapa } from '@/lib/promoFormat';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import type { Promocao } from '@/lib/types';
 
-type Props = { promo: Promocao };
+type Props = {
+  promo: Promocao;
+  onOpenDetail?: (promo: Promocao) => void;
+};
 
-export function FeaturedCard({ promo }: Props) {
+export function FeaturedCard({ promo, onOpenDetail }: Props) {
   const desconto = Math.round(promo.percentual_desconto);
+  const capa = getPromoCapa(promo);
+
+  function handleOpenDetail() {
+    if (!onOpenDetail) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onOpenDetail(promo);
+  }
 
   return (
     <View style={styles.card}>
@@ -29,33 +42,40 @@ export function FeaturedCard({ promo }: Props) {
         <ShareButton promo={promo} size={13} />
       </View>
 
-      <View style={styles.body}>
-        <View style={styles.imageWrap}>
-          {promo.foto_url ? (
-            <Image source={{ uri: promo.foto_url }} style={styles.image} resizeMode="contain" />
-          ) : (
-            <Text style={styles.semImagem}>sem img</Text>
-          )}
-        </View>
+      <Pressable
+        onPress={handleOpenDetail}
+        disabled={!onOpenDetail}
+        style={({ pressed }) => [pressed && onOpenDetail && styles.bodyPressed]}
+      >
+        <View style={styles.body}>
+          <View style={styles.imageWrap}>
+            {capa ? (
+              <Image source={{ uri: capa }} style={styles.image} contentFit="contain" transition={150} />
+            ) : (
+              <Text style={styles.semImagem}>sem img</Text>
+            )}
+          </View>
 
-        <View style={styles.info}>
-          <LojaBadge promo={promo} />
-          <Text style={styles.titulo} numberOfLines={2}>{promo.titulo}</Text>
-          <Text style={styles.precoOriginal}>{fmtBRL.format(promo.preco_original)}</Text>
-          <View style={styles.precoRow}>
-            <Text style={styles.precoAtual}>{fmtBRL.format(promo.preco_desconto)}</Text>
-            <View style={styles.badgeDesconto}>
-              <Text style={styles.badgeText}>-{desconto}%</Text>
+          <View style={styles.info}>
+            <LojaBadge promo={promo} />
+            <Text style={styles.titulo} numberOfLines={2}>{promo.titulo}</Text>
+            <Text style={styles.precoOriginal}>{fmtBRL.format(promo.preco_original)}</Text>
+            <View style={styles.precoRow}>
+              <Text style={styles.precoAtual}>{fmtBRL.format(promo.preco_desconto)}</Text>
+              <View style={styles.badgeDesconto}>
+                <Text style={styles.badgeText}>-{desconto}%</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      </Pressable>
 
       <Pressable
         style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-        onPress={() => void Linking.openURL(promo.link_afiliado)}
+        onPress={handleOpenDetail}
+        disabled={!onOpenDetail}
       >
-        <Text style={styles.ctaText}>Ver oferta →</Text>
+        <Text style={styles.ctaText}>Ver detalhes</Text>
       </Pressable>
     </View>
   );
@@ -81,6 +101,7 @@ const styles = StyleSheet.create({
   tagSpacer: { flex: 1 },
   tagText: { fontSize: 11, color: Colors.primaryText, fontWeight: '500' },
   tagSep: { fontSize: 11, color: Colors.textTertiary },
+  bodyPressed: { opacity: 0.92 },
   body: {
     flexDirection: 'row',
     padding: Spacing.md,

@@ -14,4 +14,8 @@ export const Colors = {
   starBg: '#fffbe6',
   danger: '#e53e3e',
   dangerLight: '#fff5f5',
+  unreadBg: '#F8FAFF',
+  unreadBorder: '#E0E7FF',
 };
+
+export type ColorPalette = typeof Colors;

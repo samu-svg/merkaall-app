@@ -12,9 +12,10 @@ type Props = {
   size?: number;
   style?: ViewStyle;
   variant?: 'icon' | 'pill';
+  onCopied?: () => void;
 };
 
-export function ShareButton({ promo, size = 14, style, variant = 'icon' }: Props) {
+export function ShareButton({ promo, size = 14, style, variant = 'icon', onCopied }: Props) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -25,7 +26,10 @@ export function ShareButton({ promo, size = 14, style, variant = 'icon' }: Props
 
   function handlePress() {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    openShareSheet(promo, () => setCopied(true));
+    openShareSheet(promo, () => {
+      setCopied(true);
+      onCopied?.();
+    });
   }
 
   if (variant === 'pill') {

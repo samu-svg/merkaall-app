@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Plus, Trash2, Bell } from 'lucide-react-native';
+import { AppFooter } from '@/components/AppFooter';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { formatAlertCondicao, formatAlertStatus } from '@/lib/alerts';
@@ -120,6 +121,7 @@ export function AlertsScreen() {
             <Text style={styles.emptyHint}>Toque em + para criar um alerta de preço.</Text>
           </View>
         }
+        ListFooterComponent={alertas.length > 0 ? <AppFooter /> : null}
         renderItem={({ item }) => (
           <View style={[styles.card, !item.ativo && styles.cardInativo]}>
             <View style={styles.cardInfo}>

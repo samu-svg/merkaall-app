@@ -1,0 +1,8 @@
+-- Documentação: exclusão de conta via Edge Function delete-account
+-- A função usa service role para apagar auth.users (CASCADE em profiles,
+-- promocoes_salvas, alertas_preco) e limpar user_events, user_profiles e notificacoes.
+--
+-- Deploy:
+--   supabase functions deploy delete-account
+--
+-- Variáveis automáticas no runtime: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY

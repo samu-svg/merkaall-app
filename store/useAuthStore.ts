@@ -9,9 +9,12 @@ import {
   getSession,
   sair,
 } from "@/lib/auth";
+import { getDeviceId } from "@/lib/deviceId";
+import { registerPushToken } from "@/lib/push";
 import { getSupabaseClient } from "@/lib/supabase";
 import type { PerfilUsuario } from "@/lib/types";
 import { syncUserData } from "@/lib/userSync";
+import { deleteAccount as deleteAccountRequest } from "@/lib/accountDeletion";
 
 type AuthStore = {
   session: Session | null;
@@ -23,6 +26,7 @@ type AuthStore = {
   signIn: (email: string, senha: string) => Promise<boolean>;
   signUp: (email: string, senha: string, nome: string) => Promise<{ ok: boolean; needsConfirmation?: boolean }>;
   signOut: () => Promise<boolean>;
+  deleteAccount: () => Promise<{ ok: boolean; error?: string }>;
   clearError: () => void;
   refreshProfile: () => Promise<void>;
 };
@@ -73,6 +77,22 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
         if (event === "SIGNED_IN" && session?.user) {
           await syncUserData(session.user.id);
+
+          const supabase = getSupabaseClient();
+          if (supabase) {
+            try {
+              const deviceId = await getDeviceId();
+              const { error } = await supabase.rpc("merge_user_events", {
+                p_device_id: deviceId,
+                p_user_id: session.user.id,
+              });
+              if (error) console.warn("[auth] merge_user_events:", error.message);
+            } catch (err) {
+              console.warn("[auth] merge_user_events:", err);
+            }
+          }
+
+          void registerPushToken(session.user.id);
         }
       });
     });
@@ -115,6 +135,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
     set({ session: null, perfil: null, isLoading: false, error: null });
     return true;
+  },
+
+  deleteAccount: async () => {
+    set({ isLoading: true, error: null });
+    const result = await deleteAccountRequest();
+    if (!result.ok) {
+      set({ isLoading: false, error: result.error });
+      return { ok: false, error: result.error };
+    }
+    set({ session: null, perfil: null, isLoading: false, error: null });
+    return { ok: true };
   },
 
   clearError: () => set({ error: null }),

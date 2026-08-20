@@ -1,0 +1,7 @@
+.expo-export-test/
+.expo/
+dist/
+web-build/
+node_modules/.cache/
+*.md
+!README.md

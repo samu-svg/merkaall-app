@@ -83,6 +83,10 @@ CREATE TRIGGER trg_recalcular_perfil
   FOR EACH ROW EXECUTE FUNCTION trigger_recalcular_perfil();
 
 -- 5. Função principal de recomendação (80% relevância + 20% descoberta)
+-- DROP necessário: CREATE OR REPLACE não altera o tipo de retorno (OUT params).
+DROP FUNCTION IF EXISTS public.recomendar_promocoes(text, integer);
+DROP FUNCTION IF EXISTS public.recomendar_promocoes(text, int);
+
 CREATE OR REPLACE FUNCTION recomendar_promocoes(
   p_user_id   text,
   p_limite    int DEFAULT 30

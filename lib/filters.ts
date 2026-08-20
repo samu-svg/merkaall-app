@@ -12,7 +12,7 @@ export function hasFiltrosModalAtivos(filtros: FiltrosAtivos): boolean {
   return (
     filtros.precoMin > PRECO_MIN_PADRAO ||
     filtros.precoMax < PRECO_MAX_PADRAO ||
-    filtros.descontoMinimo > 0 ||
+    filtros.descontoMaximo < DESCONTO_MAX_PADRAO ||
     filtros.categorias.length > 0
   );
 }
@@ -22,19 +22,19 @@ export function limparFiltrosModal(filtros: FiltrosAtivos): FiltrosAtivos {
     ...filtros,
     precoMin: PRECO_MIN_PADRAO,
     precoMax: PRECO_MAX_PADRAO,
-    descontoMinimo: 0,
+    descontoMaximo: DESCONTO_MAX_PADRAO,
     categorias: [],
   };
 }
 
 export function resetFiltrosModal(): Pick<
   FiltrosAtivos,
-  'precoMin' | 'precoMax' | 'descontoMinimo' | 'categorias'
+  'precoMin' | 'precoMax' | 'descontoMaximo' | 'categorias'
 > {
   return {
     precoMin: FILTROS_PADRAO.precoMin,
     precoMax: FILTROS_PADRAO.precoMax,
-    descontoMinimo: FILTROS_PADRAO.descontoMinimo,
+    descontoMaximo: FILTROS_PADRAO.descontoMaximo,
     categorias: FILTROS_PADRAO.categorias,
   };
 }

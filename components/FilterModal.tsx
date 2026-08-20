@@ -25,20 +25,20 @@ type Props = {
   visible: boolean;
   filtros: FiltrosAtivos;
   onClose: () => void;
-  onApply: (patch: Pick<FiltrosAtivos, 'precoMin' | 'precoMax' | 'descontoMinimo' | 'categorias'>) => void;
+  onApply: (patch: Pick<FiltrosAtivos, 'precoMin' | 'precoMax' | 'descontoMaximo' | 'categorias'>) => void;
 };
 
 export function FilterModal({ visible, filtros, onClose, onApply }: Props) {
   const [precoMin, setPrecoMin] = useState(filtros.precoMin);
   const [precoMax, setPrecoMax] = useState(filtros.precoMax);
-  const [descontoMinimo, setDescontoMinimo] = useState(filtros.descontoMinimo);
+  const [descontoMaximo, setDescontoMaximo] = useState(filtros.descontoMaximo);
   const [categorias, setCategorias] = useState<string[]>(filtros.categorias);
 
   useEffect(() => {
     if (!visible) return;
     setPrecoMin(filtros.precoMin);
     setPrecoMax(filtros.precoMax);
-    setDescontoMinimo(filtros.descontoMinimo);
+    setDescontoMaximo(filtros.descontoMaximo);
     setCategorias(filtros.categorias);
   }, [visible, filtros]);
 
@@ -64,14 +64,14 @@ export function FilterModal({ visible, filtros, onClose, onApply }: Props) {
     const reset = resetFiltrosModal();
     setPrecoMin(reset.precoMin);
     setPrecoMax(reset.precoMax);
-    setDescontoMinimo(reset.descontoMinimo);
+    setDescontoMaximo(reset.descontoMaximo);
     setCategorias(reset.categorias);
     onApply(reset);
     onClose();
   }
 
   function aplicar() {
-    onApply({ precoMin, precoMax, descontoMinimo, categorias });
+    onApply({ precoMin, precoMax, descontoMaximo, categorias });
     onClose();
   }
 
@@ -117,15 +117,15 @@ export function FilterModal({ visible, filtros, onClose, onApply }: Props) {
             thumbTintColor={Colors.primary}
           />
 
-          <Text style={styles.label}>Desconto mínimo</Text>
-          <Text style={styles.rangeValue}>{Math.round(descontoMinimo)}%</Text>
+          <Text style={styles.label}>Desconto máximo</Text>
+          <Text style={styles.rangeValue}>{Math.round(descontoMaximo)}%</Text>
           <Slider
             style={styles.slider}
-            minimumValue={0}
+            minimumValue={5}
             maximumValue={DESCONTO_MAX_PADRAO}
             step={5}
-            value={descontoMinimo}
-            onValueChange={(v) => setDescontoMinimo(Math.round(v))}
+            value={descontoMaximo}
+            onValueChange={(v) => setDescontoMaximo(Math.round(v))}
             minimumTrackTintColor={Colors.primary}
             maximumTrackTintColor={Colors.border}
             thumbTintColor={Colors.primary}

@@ -1,32 +1,89 @@
 {
   "expo": {
-    "name": "PromoçãoPro",
+    "name": "Merkaall",
     "slug": "promocaopro-mobile",
-    "version": "1.0.0",
-    "orientation": "portrait",
+    "version": "1.0.3",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/merkaall-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#f97316"
+      "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.promocaopro.app"
+      "bundleIdentifier": "com.merkaall.app",
+      "buildNumber": "4",
+      "associatedDomains": [
+        "applinks:merkaall.com"
+      ],
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#f97316"
+        "backgroundColor": "#FF6B00"
       },
-      "package": "com.promocaopro.app",
-      "permissions": ["POST_NOTIFICATIONS"]
+      "package": "com.Merkaall",
+      "versionCode": 4,
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "merkaall.com",
+              "pathPrefix": "/promo"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "merkaall"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
-    "scheme": "promocaopro",
+    "scheme": "merkaall",
     "plugins": [
       "expo-asset",
-      "expo-notifications"
-    ]
+      "expo-notifications",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/merkaall-logo.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF",
+          "imageWidth": 280
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4e7e5529-6b50-45ff-92ba-9bcf7d02663b"
+      }
+    },
+    "owner": "samueldourado.mendes"
   }
 }

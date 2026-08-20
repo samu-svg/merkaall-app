@@ -1,13 +1,24 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { getSession } from "@/lib/auth";
+import { STORAGE_PREFIX } from "@/constants/brand";
+import { normalizePromocao } from "@/lib/promoFormat";
+import { migrateStorageKey } from "@/lib/storageMigration";
 import { getSupabaseClient } from "@/lib/supabase";
 import type { AlertaPreco, Promocao } from "@/lib/types";
 import { useAlertsStore } from "@/store/useAlertsStore";
 import { useSavedStore } from "@/store/useSavedStore";
 
-export const SAVED_STORAGE_KEY = "@promocaopro:saved";
-export const ALERTS_STORAGE_KEY = "@promocaopro:alerts";
+const LEGACY_PREFIX = "@promocaopro";
+
+export const SAVED_STORAGE_KEY = `${STORAGE_PREFIX}:saved`;
+export const SAVED_PRICES_KEY = `${STORAGE_PREFIX}:saved_prices`;
+export const ALERTS_STORAGE_KEY = `${STORAGE_PREFIX}:alerts`;
+
+export async function migrateLegacyUserStorage(): Promise<void> {
+  await migrateStorageKey(`${LEGACY_PREFIX}:saved`, SAVED_STORAGE_KEY);
+  await migrateStorageKey(`${LEGACY_PREFIX}:alerts`, ALERTS_STORAGE_KEY);
+}
 
 type AlertaPrecoRow = {
   id: string;
@@ -98,7 +109,8 @@ export async function fetchSavedFromCloud(userId: string): Promise<Promocao[]> {
 
   return ((data ?? []) as unknown as SavedRow[])
     .map((row) => row.promocoes)
-    .filter((promo): promo is Promocao => promo != null && promo.aprovada);
+    .filter((promo): promo is Promocao => promo != null && promo.aprovada)
+    .map((promo) => normalizePromocao(promo as Record<string, unknown>));
 }
 
 export async function fetchAlertsFromCloud(userId: string): Promise<AlertaPreco[]> {

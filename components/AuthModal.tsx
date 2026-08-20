@@ -11,8 +11,10 @@ import {
   View,
 } from 'react-native';
 
+import { LegalLinks } from '@/components/LegalLinks';
 import { Colors } from '@/constants/colors';
 import { Radius, Spacing } from '@/constants/spacing';
+import { MIN_PASSWORD_LENGTH, validatePasswordStrength } from '@/lib/password';
 import { useAuthStore } from '@/store/useAuthStore';
 
 type AuthMode = 'login' | 'cadastro';
@@ -28,6 +30,7 @@ export function AuthModal({ visible, onClose }: Props) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState<string | null>(null);
+  const [aceitouTermos, setAceitouTermos] = useState(false);
 
   const { signIn, signUp, isLoading, error, clearError } = useAuthStore();
 
@@ -38,6 +41,7 @@ export function AuthModal({ visible, onClose }: Props) {
       setEmail('');
       setSenha('');
       setMensagem(null);
+      setAceitouTermos(false);
       clearError();
     }
   }, [visible, clearError]);
@@ -62,6 +66,15 @@ export function AuthModal({ visible, onClose }: Props) {
       const nomeTrim = nome.trim();
       if (!nomeTrim) {
         setMensagem('Informe seu nome.');
+        return;
+      }
+      if (!aceitouTermos) {
+        setMensagem('Aceite a Política de Privacidade e os Termos de Uso para continuar.');
+        return;
+      }
+      const senhaErro = validatePasswordStrength(senha);
+      if (senhaErro) {
+        setMensagem(senhaErro);
         return;
       }
       const result = await signUp(emailTrim, senha, nomeTrim);
@@ -141,13 +154,34 @@ export function AuthModal({ visible, onClose }: Props) {
 
           <TextInput
             style={styles.input}
-            placeholder="Senha (mín. 6 caracteres)"
+            placeholder={`Senha (mín. ${MIN_PASSWORD_LENGTH} caracteres)`}
             placeholderTextColor={Colors.textTertiary}
             value={senha}
             onChangeText={setSenha}
             secureTextEntry
             editable={!isLoading}
           />
+
+          {mode === 'cadastro' && (
+            <Pressable
+              style={styles.termsRow}
+              onPress={() => setAceitouTermos((v) => !v)}
+              disabled={isLoading}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: aceitouTermos }}
+              accessibilityLabel="Aceito a Política de Privacidade e os Termos de Uso"
+            >
+              <View style={[styles.checkbox, aceitouTermos && styles.checkboxChecked]}>
+                {aceitouTermos ? <Text style={styles.checkmark}>✓</Text> : null}
+              </View>
+              <Text style={styles.termsText}>
+                Li e aceito a <Text style={styles.termsEmphasis}>Política de Privacidade</Text> e os{' '}
+                <Text style={styles.termsEmphasis}>Termos de Uso</Text>.
+              </Text>
+            </Pressable>
+          )}
+
+          {mode === 'cadastro' && <LegalLinks variant="inline" />}
 
           {(error || mensagem) && (
             <Text style={[styles.feedback, mensagem ? styles.feedbackInfo : styles.feedbackError]}>
@@ -279,5 +313,40 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontSize: 14,
     fontWeight: '500',
+  },
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  checkboxChecked: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  checkmark: {
+    color: Colors.surface,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  termsText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 19,
+    color: Colors.textSecondary,
+  },
+  termsEmphasis: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
 });

@@ -1,13 +1,22 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { STORAGE_PREFIX } from '@/constants/brand';
 import { promoMatchesAlert } from '@/lib/alerts';
+import { isDescontoSuspeito } from '@/lib/promoFormat';
 import { sendAlertMatchNotification, sendPriceDropNotification, sendPromoNotification } from '@/lib/notifications';
+import { migrateStorageKey } from '@/lib/storageMigration';
 import type { Promocao } from '@/lib/types';
 import { useAlertsStore } from '@/store/useAlertsStore';
 import { useNotificationsStore } from '@/store/useNotificationsStore';
 import { useSavedStore } from '@/store/useSavedStore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PROMO_DISCOUNT_THRESHOLD = 50;
-const ALERT_MATCHES_KEY = '@promocaopro:alert_matches';
+const LEGACY_ALERT_MATCHES_KEY = '@promocaopro:alert_matches';
+const ALERT_MATCHES_KEY = `${STORAGE_PREFIX}:alert_matches`;
+
+async function ensureAlertMatchesMigrated(): Promise<void> {
+  await migrateStorageKey(LEGACY_ALERT_MATCHES_KEY, ALERT_MATCHES_KEY);
+}
 
 function canNotify(): boolean {
   const { permissionGranted, isLoaded } = useNotificationsStore.getState();
@@ -26,6 +35,7 @@ async function notifyPriceDrop(promo: Promocao) {
 
 async function wasAlertNotified(alertId: string, promoId: string): Promise<boolean> {
   try {
+    await ensureAlertMatchesMigrated();
     const raw = await AsyncStorage.getItem(ALERT_MATCHES_KEY);
     const keys: string[] = raw ? (JSON.parse(raw) as string[]) : [];
     return keys.includes(`${alertId}:${promoId}`);
@@ -36,6 +46,7 @@ async function wasAlertNotified(alertId: string, promoId: string): Promise<boole
 
 async function markAlertNotified(alertId: string, promoId: string): Promise<void> {
   try {
+    await ensureAlertMatchesMigrated();
     const raw = await AsyncStorage.getItem(ALERT_MATCHES_KEY);
     const keys: string[] = raw ? (JSON.parse(raw) as string[]) : [];
     const key = `${alertId}:${promoId}`;
@@ -49,7 +60,7 @@ async function markAlertNotified(alertId: string, promoId: string): Promise<void
 }
 
 export async function checkAlertsForPromo(promo: Promocao): Promise<void> {
-  if (!promo.aprovada || !canNotify()) return;
+  if (!promo.aprovada || isDescontoSuspeito(promo) || !canNotify()) return;
 
   const { prefs } = useNotificationsStore.getState();
   if (!prefs.novasPromocoes) return;
@@ -65,7 +76,7 @@ export async function checkAlertsForPromo(promo: Promocao): Promise<void> {
 }
 
 export async function handleNewPromo(promo: Promocao): Promise<void> {
-  if (!promo.aprovada || !canNotify()) return;
+  if (!promo.aprovada || isDescontoSuspeito(promo) || !canNotify()) return;
 
   const { prefs, isSeen, markSeen } = useNotificationsStore.getState();
   if (isSeen(promo.id)) return;
@@ -85,7 +96,7 @@ export async function handlePromoUpdate(
   _anterior: Promocao | undefined,
   atualizada: Promocao,
 ): Promise<void> {
-  if (!atualizada.aprovada || !canNotify()) return;
+  if (!atualizada.aprovada || isDescontoSuspeito(atualizada) || !canNotify()) return;
 
   const { prefs } = useNotificationsStore.getState();
   const salvo = useSavedStore.getState().saved.find((p) => p.id === atualizada.id);
