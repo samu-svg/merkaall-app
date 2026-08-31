@@ -3,9 +3,7 @@ import { useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -16,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { Trash2 } from 'lucide-react-native';
 
 import { AppFooter } from '@/components/AppFooter';
+import { Screen } from '@/components/Screen';
 import { CategoryChip } from '@/components/CategoryChip';
 import { PromoCard } from '@/components/PromoCard';
 import { Colors, type ColorPalette } from '@/constants/colors';
@@ -64,7 +63,6 @@ function sortSaved(
 
 function createStyles(c: ColorPalette) {
   return StyleSheet.create({
-    safe: { flex: 1, backgroundColor: c.background },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -130,9 +128,7 @@ export function SavedScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-
+    <Screen>
       <View style={styles.header}>
         <Text style={styles.title}>Salvos</Text>
         {saved.length > 0 && (
@@ -191,6 +187,6 @@ export function SavedScreen() {
           </View>
         )}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

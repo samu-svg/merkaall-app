@@ -84,3 +84,14 @@ export function getLojaNome(promo: Pick<Promocao, 'loja' | 'link_afiliado'>): st
 export function getLojaTema(nome: string): LojaTema {
   return TEMAS_LOJA[nome] ?? TEMA_PADRAO;
 }
+
+const LOJAS_CTA_MARCA = new Set(['Mercado Livre', 'AliExpress']);
+
+/** Cores do botão "Ver detalhes" para lojas com identidade própria. */
+export function getVerDetalhesTema(
+  promo: Pick<Promocao, 'loja' | 'link_afiliado'>,
+): LojaTema | null {
+  const nome = getLojaNome(promo);
+  if (!LOJAS_CTA_MARCA.has(nome)) return null;
+  return TEMAS_LOJA[nome] ?? null;
+}

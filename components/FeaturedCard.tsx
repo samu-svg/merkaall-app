@@ -7,6 +7,7 @@ import { LojaBadge } from '@/components/LojaBadge';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { fmtBRL } from '@/lib/format';
+import { getVerDetalhesTema } from '@/lib/lojas';
 import { getPromoCapa } from '@/lib/promoFormat';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import type { Promocao } from '@/lib/types';
@@ -19,6 +20,7 @@ type Props = {
 export function FeaturedCard({ promo, onOpenDetail }: Props) {
   const desconto = Math.round(promo.percentual_desconto);
   const capa = getPromoCapa(promo);
+  const ctaTema = getVerDetalhesTema(promo);
 
   function handleOpenDetail() {
     if (!onOpenDetail) return;
@@ -71,11 +73,15 @@ export function FeaturedCard({ promo, onOpenDetail }: Props) {
       </Pressable>
 
       <Pressable
-        style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+        style={({ pressed }) => [
+          styles.cta,
+          ctaTema && { backgroundColor: ctaTema.background },
+          pressed && styles.ctaPressed,
+        ]}
         onPress={handleOpenDetail}
         disabled={!onOpenDetail}
       >
-        <Text style={styles.ctaText}>Ver detalhes</Text>
+        <Text style={[styles.ctaText, ctaTema && { color: ctaTema.texto }]}>Ver detalhes</Text>
       </Pressable>
     </View>
   );

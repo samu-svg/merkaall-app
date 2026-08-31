@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   FlatList,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Switch,
   Text,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import { Plus, Trash2, Bell } from 'lucide-react-native';
 import { AppFooter } from '@/components/AppFooter';
+import { Screen } from '@/components/Screen';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { formatAlertCondicao, formatAlertStatus } from '@/lib/alerts';
@@ -100,7 +100,7 @@ export function AlertsScreen() {
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <Screen>
       <View style={styles.header}>
         <Text style={styles.title}>Alertas de Preço</Text>
         <Pressable onPress={() => setShowForm((v) => !v)} style={styles.addBtn}>
@@ -147,12 +147,11 @@ export function AlertsScreen() {
           </View>
         )}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

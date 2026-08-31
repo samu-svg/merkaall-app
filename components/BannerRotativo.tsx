@@ -10,6 +10,7 @@ import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 
 import { fmtBRL } from '@/lib/format';
+import { getVerDetalhesTema } from '@/lib/lojas';
 import { getPromoCapa } from '@/lib/promoFormat';
 import { LojaBadge } from '@/components/LojaBadge';
 import { Colors, type ColorPalette } from '@/constants/colors';
@@ -177,6 +178,7 @@ export function BannerRotativo({ promocoes, onOpenDetail }: Props) {
   if (!promo) return null;
   const desconto = Math.round(promo.percentual_desconto);
   const capa = getPromoCapa(promo);
+  const ctaTema = getVerDetalhesTema(promo);
 
   function handleOpenDetail() {
     if (!onOpenDetail) return;
@@ -220,13 +222,19 @@ export function BannerRotativo({ promocoes, onOpenDetail }: Props) {
             </Text>
           </View>
           <Pressable
-            style={({ pressed }) => [styles.botao, pressed && styles.botaoPressed]}
+            style={({ pressed }) => [
+              styles.botao,
+              ctaTema && { backgroundColor: ctaTema.background },
+              pressed && styles.botaoPressed,
+            ]}
             onPress={handleOpenDetail}
             disabled={!onOpenDetail}
             accessibilityRole="button"
             accessibilityLabel={`Ver detalhes de ${promo.titulo}`}
           >
-            <Text style={styles.botaoText}>Ver detalhes →</Text>
+            <Text style={[styles.botaoText, ctaTema && { color: ctaTema.texto }]}>
+              Ver detalhes →
+            </Text>
           </Pressable>
         </View>
       </Animated.View>

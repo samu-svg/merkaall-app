@@ -5,7 +5,7 @@ import { BrandLogo } from '@/components/BrandLogo';
 export function AppSplash() {
   return (
     <View style={styles.root}>
-      <BrandLogo variant="horizontal" size={120} />
+      <BrandLogo variant="horizontal" size={96} />
     </View>
   );
 }

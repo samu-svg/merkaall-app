@@ -4,8 +4,6 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  SafeAreaView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -13,6 +11,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Bell, ChevronLeft, Sparkles, Tag, TrendingDown } from 'lucide-react-native';
 
+import { Screen } from '@/components/Screen';
 import { Colors, type ColorPalette } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { useNotificacoes } from '@/hooks/useNotificacoes';
@@ -28,7 +27,6 @@ type Props = {
 
 function createStyles(c: ColorPalette) {
   return StyleSheet.create({
-    safe: { flex: 1, backgroundColor: c.background },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -254,9 +252,7 @@ export function NotificationsScreen({ onClose }: Props) {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-
+    <Screen edges={['top', 'bottom', 'left', 'right']}>
       <View style={styles.header}>
         <Pressable
           onPress={onClose}
@@ -322,6 +318,6 @@ export function NotificationsScreen({ onClose }: Props) {
           />
         )}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

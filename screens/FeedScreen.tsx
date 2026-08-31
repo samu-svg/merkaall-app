@@ -3,9 +3,7 @@ import {
   ActivityIndicator,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   SectionList,
-  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -16,6 +14,7 @@ import { CategoryPickerModal } from '@/components/CategoryPickerModal';
 import { CategoryPicker, isCategorySelectionValid } from '@/components/CategoryPicker';
 import { LiveBadge } from '@/components/LiveBadge';
 import { PromoBubble } from '@/components/feed/PromoBubble';
+import { Screen } from '@/components/Screen';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import {
@@ -142,8 +141,7 @@ export function FeedScreen() {
 
   if (categorias.length === 0) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+      <Screen>
         <View style={styles.setupWrap}>
           <Text style={styles.setupTitle}>Monte seu feed</Text>
           <Text style={styles.setupSub}>
@@ -170,14 +168,12 @@ export function FeedScreen() {
             <Text style={styles.setupBtnText}>Começar</Text>
           </Pressable>
         </View>
-      </SafeAreaView>
+      </Screen>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-
+    <Screen>
       <View style={styles.groupHeader}>
         <View style={styles.groupHeaderTop}>
           <View style={styles.groupHeaderText}>
@@ -262,12 +258,11 @@ export function FeedScreen() {
         min={FEED_CATEGORIAS_MIN}
         max={FEED_CATEGORIAS_MAX}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
   groupHeader: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,

@@ -1,8 +1,12 @@
 import type { Session } from "@supabase/supabase-js";
 
+import { APP_WEB_URL } from "@/constants/brand";
 import { getSupabaseClient } from "@/lib/supabase";
 import { validatePasswordStrength } from "@/lib/password";
 import type { PerfilUsuario } from "@/lib/types";
+
+/** Página do site que recebe o retorno do e-mail de confirmação. */
+export const EMAIL_CONFIRM_REDIRECT = `${APP_WEB_URL}/auth/callback?next=/auth/confirmado`;
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
@@ -100,7 +104,10 @@ export async function cadastrar(
   const { data, error } = await supabase.auth.signUp({
     email,
     password: senha,
-    options: { data: { nome } },
+    options: {
+      data: { nome },
+      emailRedirectTo: EMAIL_CONFIRM_REDIRECT,
+    },
   });
 
   if (error) return { ok: false, error: mapAuthError(error.message) };

@@ -4,9 +4,7 @@ import {
   Alert,
   Linking,
   Pressable,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Switch,
   Text,
@@ -15,6 +13,7 @@ import {
 import Constants from 'expo-constants';
 
 import { AppFooter } from '@/components/AppFooter';
+import { Screen } from '@/components/Screen';
 import { AuthModal } from '@/components/AuthModal';
 import { BrandLogo } from '@/components/BrandLogo';
 import { CategoryPickerModal } from '@/components/CategoryPickerModal';
@@ -69,7 +68,6 @@ function Row({ label, value, right, last, styles }: RowProps) {
 
 function createStyles(c: ColorPalette) {
   return StyleSheet.create({
-    safe: { flex: 1, backgroundColor: c.background },
     scroll: { padding: Spacing.lg, gap: Spacing.xl, paddingBottom: Spacing.xxxl },
     brandHeader: {
       alignItems: 'center',
@@ -267,9 +265,7 @@ export function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-
+    <Screen>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.brandHeader}>
           <BrandLogo variant="horizontal" size={40} />
@@ -442,6 +438,6 @@ export function ProfileScreen() {
         max={FEED_CATEGORIAS_MAX}
         subtitle={`Escolha de ${FEED_CATEGORIAS_MIN} a ${FEED_CATEGORIAS_MAX} categorias para o seu feed.`}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

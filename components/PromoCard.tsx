@@ -8,6 +8,7 @@ import { CountdownTimer } from '@/components/CountdownTimer';
 import { Colors, type ColorPalette } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { fmtBRL } from '@/lib/format';
+import { getVerDetalhesTema } from '@/lib/lojas';
 import { getPromoCapa, isExpiringSoon } from '@/lib/promoFormat';
 import type { Promocao } from '@/lib/types';
 
@@ -126,6 +127,7 @@ const styles = createStyles(Colors);
 export function PromoCard({ promo, salvo, onToggleSalvo, onOpenDetail, precoQuandoSalvo }: Props) {
   const desconto = Math.round(promo.percentual_desconto);
   const capa = getPromoCapa(promo);
+  const ctaTema = getVerDetalhesTema(promo);
   const precoCaiu =
     precoQuandoSalvo != null && promo.preco_desconto < precoQuandoSalvo;
   const diferencaPreco = precoCaiu ? precoQuandoSalvo - promo.preco_desconto : 0;
@@ -219,13 +221,17 @@ export function PromoCard({ promo, salvo, onToggleSalvo, onOpenDetail, precoQuan
       </View>
 
       <Pressable
-        style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+        style={({ pressed }) => [
+          styles.cta,
+          ctaTema && { backgroundColor: ctaTema.background },
+          pressed && styles.ctaPressed,
+        ]}
         onPress={handleOpenDetail}
         disabled={!onOpenDetail}
         accessibilityRole="button"
         accessibilityLabel={`Ver detalhes de ${promo.titulo}`}
       >
-        <Text style={styles.ctaText}>Ver detalhes</Text>
+        <Text style={[styles.ctaText, ctaTema && { color: ctaTema.texto }]}>Ver detalhes</Text>
       </Pressable>
     </View>
   );

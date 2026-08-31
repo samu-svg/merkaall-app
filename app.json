@@ -2,19 +2,23 @@
   "expo": {
     "name": "Merkaall",
     "slug": "promocaopro-mobile",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#FFFFFF"
+    },
     "splash": {
-      "image": "./assets/merkaall-logo.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.merkaall.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "associatedDomains": [
         "applinks:merkaall.com"
       ],
@@ -30,8 +34,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FF6B00"
       },
+      "splash": {
+        "image": "./assets/icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFFFFF"
+      },
       "package": "com.Merkaall",
-      "versionCode": 4,
+      "versionCode": 10,
       "permissions": [
         "POST_NOTIFICATIONS"
       ],
@@ -44,6 +53,11 @@
               "scheme": "https",
               "host": "merkaall.com",
               "pathPrefix": "/promo"
+            },
+            {
+              "scheme": "https",
+              "host": "merkaall.com",
+              "pathPrefix": "/auth"
             }
           ],
           "category": [
@@ -72,10 +86,14 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/merkaall-logo.png",
+          "image": "./assets/icon.png",
           "resizeMode": "contain",
           "backgroundColor": "#FFFFFF",
-          "imageWidth": 280
+          "imageWidth": 200,
+          "ios": {
+            "image": "./assets/merkaall-logo.png",
+            "imageWidth": 280
+          }
         }
       ]
     ],

@@ -80,7 +80,9 @@ export function AuthModal({ visible, onClose }: Props) {
       const result = await signUp(emailTrim, senha, nomeTrim);
       if (!result.ok) return;
       if (result.needsConfirmation) {
-        setMensagem('Conta criada! Verifique seu e-mail para confirmar o cadastro.');
+        setMensagem(
+          'Conta criada! Abra o e-mail e toque no link para confirmar. Depois volte ao app e entre com e-mail e senha.',
+        );
         return;
       }
       onClose();

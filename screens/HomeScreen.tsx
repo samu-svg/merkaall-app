@@ -5,9 +5,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -27,6 +25,7 @@ import { PromoCard } from '@/components/PromoCard';
 import { SortModal } from '@/components/SortModal';
 import { AppFooter } from '@/components/AppFooter';
 import { BrandLogo } from '@/components/BrandLogo';
+import { Screen } from '@/components/Screen';
 import { Colors, type ColorPalette } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/spacing';
 import { useBuscaInteligente } from '@/hooks/useBuscaInteligente';
@@ -57,18 +56,24 @@ function labelCategoria(cat: string): string {
 
 function createStyles(c: ColorPalette) {
   return StyleSheet.create({
-    safe: { flex: 1, backgroundColor: c.background },
     headerFixo: {
       backgroundColor: c.background,
       paddingHorizontal: Spacing.lg,
       paddingBottom: Spacing.xs,
-      zIndex: 10,
+      zIndex: 20,
+      overflow: 'visible',
     },
     topRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: Spacing.sm,
       paddingVertical: Spacing.sm,
+      zIndex: 1,
+      overflow: 'visible',
+    },
+    topRowSugestoes: {
+      zIndex: 30,
+      elevation: 16,
     },
     brandMark: {
       flexShrink: 0,
@@ -77,6 +82,7 @@ function createStyles(c: ColorPalette) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: Spacing.xs,
+      flexShrink: 0,
     },
     bellWrap: {
       position: 'relative',
@@ -98,6 +104,10 @@ function createStyles(c: ColorPalette) {
       color: '#fff',
       fontSize: 9,
       fontWeight: '700',
+    },
+    categoriasScroll: {
+      zIndex: 0,
+      elevation: 0,
     },
     categoriasRow: {
       paddingBottom: Spacing.xs,
@@ -168,6 +178,8 @@ export function HomeScreen() {
   const [modalOrdenar, setModalOrdenar] = useState(false);
   const [termoBusca, setTermoBusca] = useState('');
   const [filtroExpiraEmBreve, setFiltroExpiraEmBreve] = useState(false);
+  const [headerBuscaCompacto, setHeaderBuscaCompacto] = useState(false);
+  const [buscaAtiva, setBuscaAtiva] = useState(false);
 
   const { promocoes, total, destaques, loading, loadingMore, refreshing, error, aoVivo, refresh, loadMore } =
     usePromocoesFeed(filtros);
@@ -361,12 +373,14 @@ export function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-
+    <Screen>
       <View style={styles.headerFixo}>
-        <View style={styles.topRow}>
-          <BrandLogo variant="horizontal" size={34} style={styles.brandMark} />
+        <View style={[styles.topRow, buscaAtiva && !termoBusca ? styles.topRowSugestoes : null]}>
+          <BrandLogo
+            variant={headerBuscaCompacto ? 'icon' : 'horizontal'}
+            size={34}
+            style={styles.brandMark}
+          />
 
           <BarraDeBusca
             variant="header"
@@ -376,10 +390,12 @@ export function HomeScreen() {
             carregando={carregandoBusca}
             erro={erroBusca}
             termosExpandidos={termosExpandidos}
+            onCompactChange={setHeaderBuscaCompacto}
+            onAtivaChange={setBuscaAtiva}
           />
 
           <View style={styles.headerActions}>
-            <LiveBadge aoVivo={aoVivo} />
+            {!headerBuscaCompacto ? <LiveBadge aoVivo={aoVivo} /> : null}
             <Pressable
               style={styles.bellWrap}
               onPress={handleOpenNotifications}
@@ -405,7 +421,9 @@ export function HomeScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={styles.categoriasScroll}
           contentContainerStyle={styles.categoriasRow}
+          pointerEvents={buscaAtiva && !termoBusca ? 'none' : 'auto'}
         >
           {categorias.map((cat) => (
             <CategoryTab
@@ -514,6 +532,6 @@ export function HomeScreen() {
         onClose={() => setModalOrdenar(false)}
         onSelect={(ordenacao) => setFiltros((prev) => ({ ...prev, ordenacao }))}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

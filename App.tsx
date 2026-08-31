@@ -2,12 +2,13 @@ import 'react-native-reanimated';
 import 'react-native-url-polyfill/auto';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Modal, Platform, StyleSheet, View } from 'react-native';
+import { Alert, Modal, StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppSplash } from '@/components/AppSplash';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -17,11 +18,11 @@ import { Onboarding } from '@/components/Onboarding';
 import { Colors } from '@/constants/colors';
 import { STORAGE_PREFIX } from '@/constants/brand';
 import { Spacing } from '@/constants/spacing';
-import { parsePromoId } from '@/lib/deepLink';
+import { parseAuthCallback, parsePromoId } from '@/lib/deepLink';
 import { initMonitoring } from '@/lib/monitoring';
 import { configureNotificationHandler } from '@/lib/notifications';
 import { registerPushToken } from '@/lib/push';
-import { buscarPromocaoPorId } from '@/lib/supabase';
+import { buscarPromocaoPorId, getSupabaseClient } from '@/lib/supabase';
 import { useSavedStore } from '@/store/useSavedStore';
 import { useAlertsStore } from '@/store/useAlertsStore';
 import { useNotificationsStore } from '@/store/useNotificationsStore';
@@ -59,7 +60,6 @@ const styles = StyleSheet.create({
   navWrap: {
     backgroundColor: Colors.background,
     paddingTop: Spacing.xs,
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
     paddingHorizontal: 0,
     gap: 4,
   },
@@ -78,6 +78,7 @@ function AppContent({
   showOnboarding: boolean | null;
   onOnboardingComplete: () => void;
 }) {
+  const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<TabName>('home');
   const loadSaved = useSavedStore((s) => s.load);
   const loadAlerts = useAlertsStore((s) => s.load);
@@ -102,6 +103,44 @@ function AppContent({
 
   const handleDeepLink = useCallback(
     async (url: string | null) => {
+      const auth = parseAuthCallback(url);
+      if (auth) {
+        const supabase = getSupabaseClient();
+        if (auth.type === 'session' && supabase) {
+          const { error } = await supabase.auth.setSession({
+            access_token: auth.accessToken,
+            refresh_token: auth.refreshToken,
+          });
+          if (!error) {
+            Alert.alert('E-mail confirmado', 'Sua conta está pronta. Você já pode usar o app.');
+            setTab('profile');
+            return;
+          }
+        }
+        if (auth.type === 'code' && supabase) {
+          const { error } = await supabase.auth.exchangeCodeForSession(auth.code);
+          if (!error) {
+            Alert.alert('E-mail confirmado', 'Sua conta está pronta. Você já pode usar o app.');
+            setTab('profile');
+            return;
+          }
+        }
+        if (auth.type === 'error') {
+          Alert.alert(
+            'Confirmação',
+            'Se você tocou no link do e-mail, tente entrar no app com e-mail e senha. A conta costuma já estar confirmada.',
+          );
+          setTab('profile');
+          return;
+        }
+        Alert.alert(
+          'E-mail confirmado',
+          'Abra o perfil e entre com o e-mail e a senha que você cadastrou.',
+        );
+        setTab('profile');
+        return;
+      }
+
       const promoId = parsePromoId(url);
       if (!promoId) return;
 
@@ -246,7 +285,7 @@ function AppContent({
       />
 
       {!detailPromo && !notificationsVisible && showOnboarding === false && (
-        <View style={styles.navWrap}>
+        <View style={[styles.navWrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
           <BrandLogo variant="horizontal" size={22} style={styles.navBrand} />
           <BottomNav
             active={tab}
@@ -282,7 +321,8 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <StatusBar style="dark" />
       <ErrorBoundary>
         {!booted && <AppSplash />}
         <AppContent
